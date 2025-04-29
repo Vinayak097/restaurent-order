@@ -1,0 +1,47 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int      @id @default(autoincrement())
+  name        String?  @db.VarChar(100)
+  phoneNumber String   @unique @db.VarChar(15)
+  createdAt   DateTime @default(now())
+
+  orders Order[] // Relation: one user can have many orders
+}
+
+model Order {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  totalAmount Decimal?  @db.Decimal(10, 2)
+  status      String?   @db.VarChar(20)
+  pickupTime  DateTime?
+  createdAt   DateTime  @default(now())
+
+  user       User        @relation(fields: [userId], references: [id])
+  orderItems OrderItem[]
+}
+
+model OrderItem {
+  id         Int      @id @default(autoincrement())
+  orderId    Int
+  menuItemId String   @db.VarChar(24) // Stored as a MongoDB _id string
+  quantity   Int
+  unitPrice  Decimal? @db.Decimal(10, 2)
+  subtotal   Decimal? @db.Decimal(10, 2)
+
+  order Order @relation(fields: [orderId], references: [id])
+}
