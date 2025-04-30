@@ -6,30 +6,26 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 model User {
   id           Int      @id @default(autoincrement())
   name         String?  @db.VarChar(100)
   phoneNumber  String   @unique @db.VarChar(15)
   createdAt    DateTime @default(now())
-  
-  orders       Order[]  // Relation: one user can have many orders
+  orders       Order[]
 }
 
 model Order {
   id          Int        @id @default(autoincrement())
   userId      Int
-  totalAmount Decimal?   @db.Decimal(10, 2)
   status      String?    @db.VarChar(20)
-  pickupTime  DateTime?
   createdAt   DateTime   @default(now())
-
   user        User       @relation(fields: [userId], references: [id])
   orderItems  OrderItem[]
 }
@@ -37,11 +33,9 @@ model Order {
 model OrderItem {
   id          Int      @id @default(autoincrement())
   orderId     Int
-  menuItemId  String    @db.VarChar(24) // Stored as a MongoDB _id string
+  menuItemId  String   @db.VarChar(24) // Stored as a MongoDB _id string
   quantity    Int
-  unitPrice   Decimal? @db.Decimal(10, 2)
-  subtotal    Decimal? @db.Decimal(10, 2)
-
-  order       Order     @relation(fields: [orderId], references: [id])
+  unitPrice   Int
+  subtotal    Int
+  order       Order    @relation(fields: [orderId], references: [id])
 }
-

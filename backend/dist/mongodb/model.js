@@ -4,31 +4,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
-const { Schema } = mongoose_1.default;
-const menuItemSchema = new Schema({
+// MongoDB - menuItem.model.js
+const menuItemSchema = new mongoose_1.default.Schema({
     name: { type: String, required: true },
-    category: { type: String, required: true },
-    description: { type: String },
+    category: { type: String, enum: ['Appetizers', 'Main Courses', 'Desserts', 'Drinks'], required: true },
+    description: String,
     price: { type: Number, required: true },
-    image_url: { type: String },
-    customizations: [
-        {
-            name: { type: String, required: true },
-            options: [
-                {
-                    name: { type: String, required: true },
-                    price_addition: { type: Number, required: true }
-                }
-            ]
-        }
-    ],
-    availability: { type: Boolean, default: true },
-    nutritional_info: {
-        calories: { type: Number },
-        allergens: [{ type: String }]
-    }
-}, {
-    timestamps: true
-});
+    imageUrl: String,
+    available: { type: Boolean, default: true }
+}, { timestamps: true });
+module.exports = mongoose_1.default.model('MenuItem', menuItemSchema);
 const MenuItem = mongoose_1.default.model('MenuItem', menuItemSchema);
 exports.default = MenuItem;

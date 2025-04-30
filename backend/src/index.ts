@@ -1,14 +1,18 @@
 import express from 'express'
 import dotenv from 'dotenv'
 import connectDB from './mongodb/mongodb'
+import menuRouter from './routes/menuRoutes'
+import orderRouter from './routes/orderRouter'
+import userRouter from './routes//userRoutes'
+dotenv.config();
 
-
-dotenv.config()
 const  app=express()
 app.use(express.json())
+app.use('/menu',menuRouter)
+app.use('/order' , orderRouter)
+app.use('/user',userRouter)
 app.listen(3000, async()=>{
-    await connectDB()   
-    
+    await connectDB();       
     console.log('server is ruuning');
 })
 
