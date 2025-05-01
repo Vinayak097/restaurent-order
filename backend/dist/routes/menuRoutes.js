@@ -7,33 +7,43 @@ const express_1 = __importDefault(require("express"));
 const model_1 = __importDefault(require("../mongodb/model"));
 const router = express_1.default.Router();
 //Fetching all menu items (potentially by category).
+//Fetching all menu items (potentially by category).
+//Fetching all menu items (potentially by category).
+//Fetching all menu items (potentially by category).
 router.get("/", async (req, res) => {
-    const { category } = req.body;
+    const { category, limit = 5, page = 1 } = req.query;
+    let query = {};
+    if (category && category !== 'all') {
+        query = { category };
+    }
     try {
-        const menu = await model_1.default.aggregate([
-            { $sort: { category: 1 } },
-            { $limit: 10 },
-            {
-                $group: {
-                    _id: '$category',
-                    items: { $push: '$$ROOT' }
-                }
-            },
-            {
-                $project: {
-                    category: '$_id',
-                    items: 1,
-                    _id: 0
-                }
+        // Convert limit and page to numbers
+        const limitNum = parseInt(limit) || 20;
+        const pageNum = parseInt(page) || 1;
+        const skip = (pageNum - 1) * limitNum;
+        // Get total count for pagination info
+        const total = await model_1.default.countDocuments(query);
+        // Get menu items with pagination
+        const menuItems = await model_1.default.find(query)
+            .sort({ category: 1 })
+            .skip(skip)
+            .limit(limitNum);
+        res.status(200).json({
+            message: "success",
+            menu: menuItems,
+            pagination: {
+                total,
+                page: pageNum,
+                limit: limitNum,
+                pages: Math.ceil(total / limitNum)
             }
-        ]);
-        res.status(200).json({ message: "success ", menu });
-        return;
+        });
     }
     catch (e) {
         console.log(e, 'menu items');
-        res.status(500).json("Internal Server Error");
-        return;
+        res.status(500).json({
+            message: "Internal Server Error"
+        });
     }
 });
 //Fetching a single menu item's details (if needed).
