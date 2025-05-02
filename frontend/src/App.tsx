@@ -9,15 +9,16 @@ import { MenuSection } from './components/Menu-section'
 import { Route, Routes } from 'react-router-dom'
 
 function App() {
-  const [count, setCount] = useState(0)
+
 
   return (
     <>
     
     <Navbar></Navbar>
     <Routes>
-      <Route path='/menu' element={<MenuSection></MenuSection>}></Route>
-      <Route path='/history' element={<CartPage></CartPage>}></Route>
+      <Route path='/menu'  element={<MenuSection></MenuSection>}></Route>
+      <Route path='/' element={<MenuSection></MenuSection>}></Route>
+      <Route path='/cart' element={<CartPage></CartPage>}></Route>
 
     </Routes>
     

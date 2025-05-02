@@ -6,10 +6,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const model_1 = __importDefault(require("../mongodb/model"));
 const router = express_1.default.Router();
-//Fetching all menu items (potentially by category).
-//Fetching all menu items (potentially by category).
-//Fetching all menu items (potentially by category).
-//Fetching all menu items (potentially by category).
 router.get("/", async (req, res) => {
     const { category, limit = 5, page = 1 } = req.query;
     let query = {};
@@ -17,13 +13,10 @@ router.get("/", async (req, res) => {
         query = { category };
     }
     try {
-        // Convert limit and page to numbers
         const limitNum = parseInt(limit) || 20;
         const pageNum = parseInt(page) || 1;
         const skip = (pageNum - 1) * limitNum;
-        // Get total count for pagination info
         const total = await model_1.default.countDocuments(query);
-        // Get menu items with pagination
         const menuItems = await model_1.default.find(query)
             .sort({ category: 1 })
             .skip(skip)

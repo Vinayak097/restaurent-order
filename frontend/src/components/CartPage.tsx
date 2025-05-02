@@ -15,7 +15,7 @@ export function CartPage() {
   const subtotal = 343
   const tax = subtotal * 0.08 // 8% tax
   const total = subtotal + tax
-
+  console.log("hello cars length is " , items)
   if (items.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
@@ -27,6 +27,8 @@ export function CartPage() {
       </div>
     )
   }
+  
+  
 
   return (
     <div className="m-4 grid gap-8 md:grid-cols-3">

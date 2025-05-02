@@ -1,5 +1,4 @@
-import axios from 'axios'
-import { error } from 'console';
+import axios from 'axios';
 
 const backendUrl = 'http://localhost:3000'
 
@@ -14,16 +13,24 @@ interface OrderPayload {
 }
 
 // API functions
-export async function getMenuItems(category: string) {
+export async function getMenuItems(category: string, limit: number = 9, page: number = 1) {
     try {
-        // const response = await axios.get(`${backendUrl}/menu?category=${category}`);
-        const res = await fetch(`${backendUrl}/menu?category=${category}`);
-    if (!res.ok) {
-      throw new Error(`HTTP error! Status: ${res.status}`);
-    }
-    const result = await res.json();
-    return result.menu;
-        
+        // Convert frontend category ID to backend category value
+        let categoryParam = category;
+        if (category === 'appetizers') categoryParam = 'Appetizers';
+        if (category === 'main-courses') categoryParam = 'Main Courses';
+        if (category === 'desserts') categoryParam = 'Desserts';
+        if (category === 'drinks') categoryParam = 'Drinks';
+
+        const url = `${backendUrl}/menu?category=${categoryParam === 'all' ? '' : categoryParam}&limit=${limit}&page=${page}`;
+        const res = await fetch(url);
+
+        if (!res.ok) {
+          throw new Error(`HTTP error! Status: ${res.status}`);
+        }
+
+        const result = await res.json();
+        return result.menu;
     } catch (error) {
         console.error('Error fetching menu items:', error);
         return [];

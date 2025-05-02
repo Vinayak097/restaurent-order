@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-
 import { MenuCard } from "./MenuCard"
 import { getMenuItems } from "@/lib/api";
+
 interface MenuItem {
-    id: string;
+    _id: string;
     name: string;
     category: string;
     description: string;
@@ -15,21 +15,53 @@ interface MenuItem {
     imageUrl: string;
     available: boolean;
   }
+
 export function MenuSection() {
   const [activeCategory, setActiveCategory] = useState("all")
   const [menuData, setMenuData] = useState<MenuItem[]>([])
-    
-  useEffect(()=>{
-    async function fetch() {
-      const data=await getMenuItems(activeCategory);
-      console.log(data, 'menudata')
-      setMenuData(data)
-      
+  const [page, setPage] = useState(1)
+  const [loading, setLoading] = useState(false)
+  const [hasMore, setHasMore] = useState(true)
+
+  // Function to fetch menu items
+  const fetchMenuItems = async (category: string, pageNum: number, isNewCategory: boolean = false) => {
+    setLoading(true)
+    try {
+      const data = await getMenuItems(category, 9, pageNum);
+
+      if (data.length === 0) {
+        setHasMore(false)
+      } else {
+        if (isNewCategory) {
+          setMenuData(data)
+        } else {
+          setMenuData(prevData => [...prevData, ...data])
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching menu items:', error)
+    } finally {
+      setLoading(false)
     }
-    fetch()
-        
-        
-  },[activeCategory])
+  }
+
+  // Initial load and category change
+  useEffect(() => {
+    setMenuData([])
+    setPage(1)
+    setHasMore(true)
+    fetchMenuItems(activeCategory, 1, true)
+  }, [activeCategory])
+
+  // Load more when page changes
+  useEffect(() => {
+    if (page > 1) {
+      fetchMenuItems(activeCategory, page)
+    }
+  }, [page])
+
+
+
   const categories = [
     { id: "all", name: "All" },
     { id: "appetizers", name: "Appetizers" },
@@ -60,17 +92,51 @@ export function MenuSection() {
             </TabsList>
           </div>
 
-          {categories.map((category) => (
-            <TabsContent key={category.id} value={category.id} className="mt-0">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {menuData
-                  .filter((item) => category.id === "all" || item.category === category.id)
-                  .map((item) => (
-                    <MenuCard key={item.id} item={item} />
-                  ))}
+          <TabsContent value={activeCategory} className="mt-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {menuData.map((item, index) => {
+                if (menuData.length === index + 1) {
+                  return (
+                    <div ref={node => {
+                      if (node) {
+                        // Use the callback ref to observe the last item
+                        const observer = new IntersectionObserver(entries => {
+                          if (entries[0].isIntersecting && hasMore && !loading) {
+                            setPage(prevPage => prevPage + 1)
+                          }
+                        }, { threshold: 1.0 })
+
+                        observer.observe(node)
+                        return () => observer.disconnect()
+                      }
+                    }} key={item._id}>
+                      <MenuCard key={item._id} item={{...item, id: item._id}} />
+                    </div>
+                  )
+                } else {
+                  return <MenuCard key={item._id} item={{...item, id: item._id}} />
+                }
+              })}
+            </div>
+
+            {loading && (
+              <div className="flex justify-center mt-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               </div>
-            </TabsContent>
-          ))}
+            )}
+
+            {!hasMore && menuData.length > 0 && (
+              <div className="text-center mt-8 text-muted-foreground">
+                No more items to load
+              </div>
+            )}
+
+            {menuData.length === 0 && !loading && (
+              <div className="text-center mt-8 text-muted-foreground">
+                No items found in this category
+              </div>
+            )}
+          </TabsContent>
         </Tabs>
       </div>
     </section>

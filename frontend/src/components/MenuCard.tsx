@@ -17,7 +17,7 @@ interface MenuCardProps {
 }
 
 export function MenuCard({ item }: MenuCardProps) {
-  
+
   const { addItem, removeItem, getItemQuantity } =useCart()
   const quantity = getItemQuantity(item.id)
 
@@ -36,10 +36,9 @@ export function MenuCard({ item }: MenuCardProps) {
     <Card className=" overflow-hidden transition-all hover:shadow-md">
       <div className="relative h-48 w-full">
         <img
-          src={item.image || "/placeholder.svg?height=200&width=300"}
+          src={item.imageUrl || item.image || "/placeholder.svg?height=200&width=300"}
           alt={item.name}
-          
-          className="object-cover"
+          className="object-cover w-full h-full"
         />
         {item.vegetarian && (
           <Badge className="absolute top-2 right-2 bg-green-600" variant="secondary">
