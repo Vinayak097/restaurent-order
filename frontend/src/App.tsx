@@ -9,7 +9,7 @@ import { Toaster } from './components/ui/toast'
 import { Route, Routes } from 'react-router-dom'
 
 function App() {
-  // No authentication required for any routes
+ 
 
   return (
     <>
