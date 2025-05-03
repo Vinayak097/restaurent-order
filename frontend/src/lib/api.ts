@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Use environment variable for backend URL or default to localhost for development
-const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const backendUrl = import.meta.env.VITE_API_URL || 'https://restaurent-order-kfo1.vercel.app';
 
 // Define interfaces
 interface OrderItem {
