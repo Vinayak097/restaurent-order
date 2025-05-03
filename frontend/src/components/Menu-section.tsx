@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-
 import { MenuCard } from "./MenuCard"
 import { getMenuItems } from "@/lib/api";
+import { useCart } from "@/store/cartStore";
 
 interface MenuItem {
     _id: string;
@@ -22,6 +22,7 @@ export function MenuSection() {
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(false)
   const [hasMore, setHasMore] = useState(true)
+  const { clearCart } = useCart()
 
   // Function to fetch menu items
   const fetchMenuItems = async (category: string, pageNum: number, isNewCategory: boolean = false) => {
@@ -44,6 +45,12 @@ export function MenuSection() {
       setLoading(false)
     }
   }
+
+  // Clear cart on initial load
+  useEffect(() => {
+    clearCart();
+    console.log("Cart cleared on menu page load");
+  }, []);
 
   // Initial load and category change
   useEffect(() => {

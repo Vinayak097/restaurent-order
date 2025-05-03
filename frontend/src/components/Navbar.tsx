@@ -1,25 +1,22 @@
 
 
 import { useState } from "react"
-
-
 import { ShoppingCart, Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Link,  } from "react-router-dom"
-
-
+import { Link, useLocation } from "react-router-dom"
+import { useCart } from "@/store/cartStore"
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const location = useLocation()
+  const pathname = location.pathname
+  const { items } = useCart()
 
-  const pathname = window.location.pathname
-const totalItems=3;
-
+  const totalItems = items.reduce((total, item) => total + item.quantity, 0)
 
   const navLinks = [
     { href: "/menu", label: "Menu" },
-    
-    { href: "/history", label: "Order History" },
+    { href: "/history", label: "Order History" }
   ]
 
   return (
@@ -30,9 +27,9 @@ const totalItems=3;
             {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             <span className="sr-only">Toggle menu</span>
           </Button>
-          <a href="/" className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2">
             <span className="font-bold text-xl text-primary">The Digital Diner</span>
-          </a>
+          </Link>
         </div>
 
         <nav className="hidden md:flex items-center gap-6">
@@ -50,7 +47,7 @@ const totalItems=3;
         </nav>
 
         <div className="flex items-center gap-2">
-          
+
           <Link to="/cart">
             <Button variant="outline" size="icon" className="relative">
               <ShoppingCart className="h-5 w-5" />
@@ -70,16 +67,16 @@ const totalItems=3;
         <div className="md:hidden border-t">
           <div className="container py-4 flex flex-col space-y-4">
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.href}
-                href={link.href}
+                to={link.href}
                 className={`text-sm font-medium transition-colors hover:text-primary ${
                   pathname === link.href ? "text-primary" : "text-muted-foreground"
                 }`}
                 onClick={() => setIsMenuOpen(false)}
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
           </div>
         </div>

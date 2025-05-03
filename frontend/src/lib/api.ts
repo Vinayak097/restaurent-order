@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const backendUrl = 'http://localhost:3000'
+// Use environment variable for backend URL or default to localhost for development
+const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 // Define interfaces
 interface OrderItem {
@@ -10,6 +11,11 @@ interface OrderItem {
 
 interface OrderPayload {
     orderItems: OrderItem[];
+}
+
+interface UserPayload {
+    name: string;
+    phone_number: string;
 }
 
 // API functions
@@ -37,10 +43,29 @@ export async function getMenuItems(category: string, limit: number = 9, page: nu
     }
 }
 
-export async function createOrder(data: OrderPayload) {
+export async function createUser(data: UserPayload) {
     try {
-        const response = await axios.post(`${backendUrl}/order`, data);
-        return response.data.message;
+        const response = await axios.post(`${backendUrl}/user`, data);
+        return response.data;
+    } catch (error) {
+        console.error('Error creating user:', error);
+        throw error;
+    }
+}
+
+export async function createOrder(data: OrderPayload, token: string) {
+    try {
+        console.log('Creating order with token:', token);
+        console.log('Order data:', data);
+
+        const response = await axios.post(`${backendUrl}/order`, data, {
+            headers: {
+                'Authorization': token
+            }
+        });
+
+        console.log('Order creation response:', response.data);
+        return response.data;
     } catch (error) {
         console.error('Error creating order:', error);
         throw error;
@@ -57,9 +82,18 @@ export async function getMenuItem(id: string) {
     }
 }
 
-export async function getPastOrders({ limit = 10, page = 1 }: { limit: number, page: number }) {
+export async function getPastOrders({ limit = 10, page = 1, token }: { limit: number, page: number, token: string }) {
     try {
-        const response = await axios.get(`${backendUrl}/order/getallorders?limit=${limit}&page=${page}`);
+        console.log('Fetching orders with token:', token);
+        console.log('Params:', { limit, page });
+
+        const response = await axios.get(`${backendUrl}/order/getallorders?limit=${limit}&page=${page}`, {
+            headers: {
+                'Authorization': token
+            }
+        });
+
+        console.log('Order history response:', response.data);
         return response.data;
     } catch (error) {
         console.error('Error fetching past orders:', error);

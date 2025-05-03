@@ -7,4 +7,5 @@ const express_1 = __importDefault(require("express"));
 const userController_1 = require("../controller/userController");
 const router = express_1.default.Router();
 router.post('/', userController_1.saveUser);
+router.get('/:phoneNumber', userController_1.getUserByPhone);
 exports.default = router;

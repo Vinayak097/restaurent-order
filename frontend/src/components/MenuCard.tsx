@@ -22,13 +22,24 @@ export function MenuCard({ item }: MenuCardProps) {
   const quantity = getItemQuantity(item.id)
 
   const handleAddToCart = () => {
+    console.log("Adding item to cart with ID:", item.id);
+    if (!item.id || !/^[0-9a-fA-F]{24}$/.test(item.id)) {
+      console.error("Invalid MongoDB ID:", item.id);
+      toast.error("Error adding item to cart");
+      return;
+    }
+
     addItem(item)
-    toast(
-     "Added to cart"
-    )
+    toast("Added to cart")
   }
 
   const handleRemoveFromCart = () => {
+    console.log("Removing item from cart with ID:", item.id);
+    if (!item.id || !/^[0-9a-fA-F]{24}$/.test(item.id)) {
+      console.error("Invalid MongoDB ID:", item.id);
+      return;
+    }
+
     removeItem(item.id)
   }
 

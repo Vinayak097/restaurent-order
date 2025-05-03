@@ -1,14 +1,20 @@
-import { Request, Response } from "express";
 import prisma from "../db";
+import { RequestHandler } from "../types";
 
-export const getallOrders = async (req: Request, res: Response) => {
-    const { limit = 10, page = 1 } = req.query;
-    console.log('minit ' , limit, page)
+export const getallOrders: RequestHandler = async (req, res) => {
+    const { limit = 5, page = 1 } = req.query;
     const skip = (Number(page) - 1) * Number(limit);
+
     try {
+        // Get total count for pagination
+        const totalCount = await prisma.order.count();
+
         const orders = await prisma.order.findMany({
             skip,
             take: Number(limit),
+            orderBy: {
+                createdAt: 'desc'
+            },
             include: {
                 orderItems: true,
                 user: true
@@ -24,7 +30,12 @@ export const getallOrders = async (req: Request, res: Response) => {
             return { ...order, totalAmount };
         });
 
-        res.status(200).json({ orders: ordersWithTotal });
+        res.status(200).json({
+            orders: ordersWithTotal,
+            total: totalCount,
+            page: Number(page),
+            limit: Number(limit)
+        });
         return;
     } catch (e) {
         console.log(e, 'getall orders');
@@ -33,11 +44,11 @@ export const getallOrders = async (req: Request, res: Response) => {
     }
 }
 
-export const getOrder = async (req: Request, res: Response) => {
+export const getOrder: RequestHandler = async (req, res) => {
     const { id } = req.params;
 
     if (!id) {
-        res.status(401).json({ message: 'id not found' });
+        res.status(400).json({ message: 'Order ID is required' });
         return;
     }
 
@@ -53,7 +64,7 @@ export const getOrder = async (req: Request, res: Response) => {
         });
 
         if (!order) {
-            res.status(404).json({ message: 'order not found' });
+            res.status(404).json({ message: 'Order not found' });
             return;
         }
 

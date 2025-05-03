@@ -6,13 +6,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getOrder = exports.getallOrders = void 0;
 const db_1 = __importDefault(require("../db"));
 const getallOrders = async (req, res) => {
-    const { limit = 10, page = 1 } = req.query;
-    console.log('minit ', limit, page);
+    const { limit = 5, page = 1 } = req.query;
     const skip = (Number(page) - 1) * Number(limit);
     try {
+        // Get total count for pagination
+        const totalCount = await db_1.default.order.count();
         const orders = await db_1.default.order.findMany({
             skip,
             take: Number(limit),
+            orderBy: {
+                createdAt: 'desc'
+            },
             include: {
                 orderItems: true,
                 user: true
@@ -23,7 +27,12 @@ const getallOrders = async (req, res) => {
             const totalAmount = order.orderItems.reduce((sum, item) => sum + Number(item.subtotal), 0);
             return { ...order, totalAmount };
         });
-        res.status(200).json({ orders: ordersWithTotal });
+        res.status(200).json({
+            orders: ordersWithTotal,
+            total: totalCount,
+            page: Number(page),
+            limit: Number(limit)
+        });
         return;
     }
     catch (e) {
@@ -36,7 +45,7 @@ exports.getallOrders = getallOrders;
 const getOrder = async (req, res) => {
     const { id } = req.params;
     if (!id) {
-        res.status(401).json({ message: 'id not found' });
+        res.status(400).json({ message: 'Order ID is required' });
         return;
     }
     try {
@@ -50,7 +59,7 @@ const getOrder = async (req, res) => {
             }
         });
         if (!order) {
-            res.status(404).json({ message: 'order not found' });
+            res.status(404).json({ message: 'Order not found' });
             return;
         }
         // Calculate the total amount
