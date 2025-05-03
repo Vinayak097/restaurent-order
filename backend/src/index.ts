@@ -24,7 +24,7 @@ app.use('/order', orderRouter);
 
 
 // Health check endpoint
-app.get('/health', (_req, res) => {
+app.get('/', (_req, res) => {
   res.status(200).json({ status: 'ok', message: 'Server is running' });
 });
 
