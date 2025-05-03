@@ -12,7 +12,17 @@ const menuItemSchema = new mongoose_1.default.Schema({
     price: { type: Number, required: true },
     imageUrl: String,
     available: { type: Boolean, default: true }
-}, { timestamps: true });
-module.exports = mongoose_1.default.model('MenuItem', menuItemSchema);
-const MenuItem = mongoose_1.default.model('MenuItem', menuItemSchema);
+}, {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+});
+// Ensure we don't have duplicate model
+let MenuItem;
+try {
+    MenuItem = mongoose_1.default.model('MenuItem');
+}
+catch (e) {
+    MenuItem = mongoose_1.default.model('MenuItem', menuItemSchema);
+}
 exports.default = MenuItem;

@@ -1,4 +1,4 @@
-import prisma from "../db";
+import Order, { IOrder } from "../mongodb/orderModel";
 import { RequestHandler } from "../types";
 
 export const getallOrders: RequestHandler = async (req, res) => {
@@ -6,32 +6,20 @@ export const getallOrders: RequestHandler = async (req, res) => {
     const skip = (Number(page) - 1) * Number(limit);
 
     try {
+        console.log("Fetching orders with limit:", limit, "page:", page);
+
         // Get total count for pagination
-        const totalCount = await prisma.order.count();
+        const totalCount = await Order.countDocuments();
 
-        const orders = await prisma.order.findMany({
-            skip,
-            take: Number(limit),
-            orderBy: {
-                createdAt: 'desc'
-            },
-            include: {
-                orderItems: true,
-                user: true
-            }
-        });
+        const orders: IOrder[] = await Order.find()
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(Number(limit));
 
-        // Calculate totalAmount for each order
-        const ordersWithTotal = orders.map((order: any) => {
-            const totalAmount = order.orderItems.reduce(
-                (sum: number, item: { subtotal: any }) => sum + Number(item.subtotal),
-                0
-            );
-            return { ...order, totalAmount };
-        });
+        console.log("Found orders:", orders.length);
 
         res.status(200).json({
-            orders: ordersWithTotal,
+            orders,
             total: totalCount,
             page: Number(page),
             limit: Number(limit)
@@ -53,34 +41,18 @@ export const getOrder: RequestHandler = async (req, res) => {
     }
 
     try {
-        const order = await prisma.order.findUnique({
-            where: {
-                id: Number(id)
-            },
-            include: {
-                orderItems: true,
-                user: true
-            }
-        });
+        console.log("Fetching order with ID:", id);
+
+        const order: IOrder | null = await Order.findById(id);
 
         if (!order) {
             res.status(404).json({ message: 'Order not found' });
             return;
         }
 
-        // Calculate the total amount
-        const totalAmount = order.orderItems.reduce(
-            (sum: number, item: { subtotal: any }) => sum + Number(item.subtotal),
-            0
-        );
+        console.log("Found order:", order._id);
 
-        // Add totalAmount to the order object
-        const orderWithTotal = {
-            ...order,
-            totalAmount
-        };
-
-        res.status(200).json({ message: 'order fetched', order: orderWithTotal });
+        res.status(200).json({ message: 'Order fetched', order });
         return;
     } catch (e) {
         console.log(e, 'getorder');

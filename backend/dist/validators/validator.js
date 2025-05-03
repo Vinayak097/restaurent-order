@@ -9,9 +9,12 @@ exports.userSchema = zod_1.z.object({
 });
 // Order validation schema
 exports.orderItemSchema = zod_1.z.object({
-    menuItemId: zod_1.z.string().min(1),
-    quantity: zod_1.z.number().int().positive()
+    menuItemId: zod_1.z.string(),
+    quantity: zod_1.z.union([
+        zod_1.z.number(),
+        zod_1.z.string().transform(val => Number(val))
+    ])
 });
 exports.orderSchema = zod_1.z.object({
-    orderItems: zod_1.z.array(exports.orderItemSchema).min(1)
+    orderItems: zod_1.z.array(exports.orderItemSchema)
 });

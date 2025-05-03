@@ -4,31 +4,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getOrder = exports.getallOrders = void 0;
-const db_1 = __importDefault(require("../db"));
+const orderModel_1 = __importDefault(require("../mongodb/orderModel"));
 const getallOrders = async (req, res) => {
     const { limit = 5, page = 1 } = req.query;
     const skip = (Number(page) - 1) * Number(limit);
     try {
+        console.log("Fetching orders with limit:", limit, "page:", page);
         // Get total count for pagination
-        const totalCount = await db_1.default.order.count();
-        const orders = await db_1.default.order.findMany({
-            skip,
-            take: Number(limit),
-            orderBy: {
-                createdAt: 'desc'
-            },
-            include: {
-                orderItems: true,
-                user: true
-            }
-        });
-        // Calculate totalAmount for each order
-        const ordersWithTotal = orders.map((order) => {
-            const totalAmount = order.orderItems.reduce((sum, item) => sum + Number(item.subtotal), 0);
-            return { ...order, totalAmount };
-        });
+        const totalCount = await orderModel_1.default.countDocuments();
+        const orders = await orderModel_1.default.find()
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(Number(limit));
+        console.log("Found orders:", orders.length);
         res.status(200).json({
-            orders: ordersWithTotal,
+            orders,
             total: totalCount,
             page: Number(page),
             limit: Number(limit)
@@ -49,27 +39,14 @@ const getOrder = async (req, res) => {
         return;
     }
     try {
-        const order = await db_1.default.order.findUnique({
-            where: {
-                id: Number(id)
-            },
-            include: {
-                orderItems: true,
-                user: true
-            }
-        });
+        console.log("Fetching order with ID:", id);
+        const order = await orderModel_1.default.findById(id);
         if (!order) {
             res.status(404).json({ message: 'Order not found' });
             return;
         }
-        // Calculate the total amount
-        const totalAmount = order.orderItems.reduce((sum, item) => sum + Number(item.subtotal), 0);
-        // Add totalAmount to the order object
-        const orderWithTotal = {
-            ...order,
-            totalAmount
-        };
-        res.status(200).json({ message: 'order fetched', order: orderWithTotal });
+        console.log("Found order:", order._id);
+        res.status(200).json({ message: 'Order fetched', order });
         return;
     }
     catch (e) {

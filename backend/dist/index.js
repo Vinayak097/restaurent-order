@@ -10,23 +10,10 @@ const menuRoutes_1 = __importDefault(require("./routes/menuRoutes"));
 const orderRouter_1 = __importDefault(require("./routes/orderRouter"));
 const cors_1 = __importDefault(require("cors"));
 dotenv_1.default.config();
-// Allow multiple origins for CORS
-const allowedOrigins = [
-    'http://localhost:5173',
-    'https://digital-diner.netlify.app' // Add your Netlify URL here when deployed
-];
 const app = (0, express_1.default)();
+// Use a simpler CORS configuration for development
 app.use((0, cors_1.default)({
-    origin: function (origin, callback) {
-        // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin)
-            return callback(null, true);
-        if (allowedOrigins.indexOf(origin) === -1) {
-            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-            return callback(new Error(msg), false);
-        }
-        return callback(null, true);
-    },
+    origin: '*', // Allow all origins in development
     credentials: true
 }));
 app.use(express_1.default.json());

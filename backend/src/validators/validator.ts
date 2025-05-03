@@ -8,10 +8,13 @@ export const userSchema = z.object({
 
 // Order validation schema
 export const orderItemSchema = z.object({
-    menuItemId: z.string().min(1),
-    quantity: z.number().int().positive()
+    menuItemId: z.string(),
+    quantity: z.union([
+        z.number(),
+        z.string().transform(val => Number(val))
+    ])
 });
 
 export const orderSchema = z.object({
-    orderItems: z.array(orderItemSchema).min(1)
+    orderItems: z.array(orderItemSchema)
 });
