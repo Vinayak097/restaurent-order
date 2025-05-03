@@ -85,7 +85,10 @@ export function CheckoutPage() {
       console.log("Sending order payload:", JSON.stringify(payload));
 
       // Create order with exact payload format
-      const response = await fetch(`${'http://localhost:3000'}/order`, {
+      const backendUrl = import.meta.env.VITE_API_URL || 'https://restaurent-order-kfo1.vercel.app';
+      console.log("Using backend URL:", backendUrl);
+
+      const response = await fetch(`${backendUrl}/order`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

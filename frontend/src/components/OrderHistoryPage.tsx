@@ -42,7 +42,8 @@ export function OrderHistoryPage() {
   const fetchOrders = async () => {
     setLoading(true)
     try {
-      const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      const backendUrl = import.meta.env.VITE_API_URL || 'https://restaurent-order-kfo1.vercel.app';
+      console.log("Using backend URL for order history:", backendUrl);
       const response = await fetch(`${backendUrl}/order/getallorders?limit=${limit}&page=${page}`);
 
       if (!response.ok) {
